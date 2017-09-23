@@ -1,0 +1,33 @@
+{
+  "name": "acorn-api",
+  "version": "1.0.0",
+  "description": "University of Toronto Acorn API",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CharlieUofT/acorn-api-js.git"
+  },
+  "keywords": [
+    "Acorn"
+  ],
+  "author": "Charlie Hu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CharlieUofT/acorn-api-js/issues"
+  },
+  "homepage": "https://github.com/CharlieUofT/acorn-api-js#readme",
+  "dependencies": {
+    "@types/libxmljs": "^0.14.30",
+    "@types/request": "^2.0.3",
+    "@types/request-promise": "^4.1.37",
+    "@types/tough-cookie": "^2.3.1",
+    "libxmljs": "^0.18.7",
+    "request": "^2.82.0",
+    "request-promise": "^4.2.2",
+    "tough-cookie": "^2.3.3",
+    "typescript": "^2.5.2"
+  }
+}
