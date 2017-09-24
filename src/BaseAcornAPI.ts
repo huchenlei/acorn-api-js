@@ -12,8 +12,6 @@ import libxmljs = require('libxmljs');
 
 import {AcornError} from './AcornError';
 
-// rp.defaults({jar: true}); // enable cookies for request
-
 const urlTable = {
     "authURL1": "https://acorn.utoronto.ca/sws",
     "authURL2": "https://weblogin.utoronto.ca/",
@@ -21,25 +19,14 @@ const urlTable = {
     "acornURL": "https://acorn.utoronto.ca/spACS"
 };
 
-interface LooseObj {
-    [key: string]: string
-}
-
-const headers = {
-    // "Host": "weblogin.utoronto.ca",
-    // "Connection": "keep-alive",
-    // "Pragma": "no-cache",
-    // "Cache-Control": "no-cache",
-    "Origin": "https://idp.utorauth.utoronto.ca",
-    // "Upgrade-Insecure-Requests": 1,
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
-    // "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "Referer": "https://idp.utorauth.utoronto.ca/idp/Authn/RemoteUserForceAuth",
-    // "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "zh-CN,zh;q=0.8,en;q=0.6"
+const formHeader = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36',
+    'content-type': 'application/x-www-form-urlencoded',
+    'Accept': 'text/html'
 };
 
 export class BaseAcornAPI {
+    cookieJar = rp.jar(); // Use default cookie jar implementation in request-promise
     username: string;
     password: string;
 
@@ -53,70 +40,74 @@ export class BaseAcornAPI {
         this.password = password;
     }
 
+
     /**
-     * Try to login
+     * Login to Acorn
+     * @throws AcornError throw AcornError if login failed
      */
     public async login(): Promise<void> {
-        const cookieJar = rp.jar();
         let body: string = await rp.get({
             uri: urlTable.authURL1,
-            jar: cookieJar
+            jar: this.cookieJar
         });
-        // console.log(this.extractFormData(body));
-        body = await rp.post(urlTable.authURL2, {
-            // jar: cookieJar,
-            body: this.extractFormData(body),
-            json: true
-        });
-
-        // require('fs').writeFileSync('./auth.html', body);
-        let loginInfo = this.extractFormData(body);
-        loginInfo['user'] = this.username;
-        loginInfo['pass'] = this.password;
-        // console.log(loginInfo);
-        let config = {
+        body = await rp.post({
             uri: urlTable.authURL2,
-            jar: cookieJar,
-            formData: loginInfo,
-        };
-        // console.log(config);
-        body = await rp.post(config);
+            jar: this.cookieJar,
+            headers: formHeader,
+            form: this.extractFormData(body),
+        });
+        let loginInfo = this.extractFormData(body);
+        loginInfo.set('user', this.username);
+        loginInfo.set('pass', this.password);
+        body = await rp.post({
+            uri: urlTable.authURL2,
+            jar: this.cookieJar,
+            headers: formHeader,
+            form: loginInfo,
+        });
 
-        if (body.search('Authentication failed')) throw new AcornError('Invalid Identity');
+        if (body.search('Authentication failed') > -1)
+            throw new AcornError('Invalid Identity');
+
         body = await rp.post({
             uri: urlTable.authURL3,
-            jar: cookieJar,
-            formData: this.extractFormData(body)
+            jar: this.cookieJar,
+            headers: formHeader,
+            form: this.extractFormData(body),
+            followAllRedirects: true
         });
-        if (body.search('<h1>A problem has occurred</H1>')) throw new AcornError('Invalid Identity');
+
+        if (body.search('<h1>A problem has occurred</H1>') > -1)
+            throw new AcornError('A problem has occurred');
+
         body = await rp.post({
             uri: urlTable.acornURL,
-            jar: cookieJar,
-            formData: this.extractFormData(body)
+            jar: this.cookieJar,
+            headers: formHeader,
+            form: this.extractFormData(body),
+            followAllRedirects: true
         });
 
         if (!body.search('<title>ACORN</title>'))
             throw new AcornError('Acorn Unavailable Now');
-
     }
 
     /**
      * Extract data from fields of all existing forms from HTML string or dom
      * @param doc HTML Document or HTML string
      */
-    private extractFormData(doc: libxmljs.HTMLDocument | string): LooseObj {
+    private extractFormData(doc: libxmljs.HTMLDocument | string): Map<string, string> {
         let sanctifiedDoc: libxmljs.HTMLDocument;
         if (typeof doc === 'string') {
             sanctifiedDoc = libxmljs.parseHtml(doc);
         } else {
             sanctifiedDoc = doc;
         }
-        const inputs: Array<libxmljs.Element> = sanctifiedDoc.find('//form/input');
-        let result: LooseObj = {};
+        const inputs: Array<libxmljs.Element> = sanctifiedDoc.find('//form//input');
+        let result = new Map<string, string>();
         for (let input of inputs) {
-            result[input.attr('name').value()] = input.attr('value').value();
+            result.set(input.attr('name').value(), input.attr('value').value());
         }
         return result;
-
     }
 }
