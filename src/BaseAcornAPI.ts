@@ -25,10 +25,14 @@ const formHeader = {
     'Accept': 'text/html'
 };
 
+interface LooseObj {
+    [key: string]: string;
+}
+
 export class BaseAcornAPI {
-    cookieJar = rp.jar(); // Use default cookie jar implementation in request-promise
-    username: string;
-    password: string;
+    protected cookieJar = rp.jar(); // Use default cookie jar implementation in request-promise
+    private username: string;
+    private password: string;
 
     /**
      * Password login acorn
@@ -44,8 +48,9 @@ export class BaseAcornAPI {
     /**
      * Login to Acorn
      * @throws AcornError throw AcornError if login failed
+     * @returns Boolean will be true if all processes goes properly
      */
-    public async login(): Promise<void> {
+    public async login(): Promise<boolean> {
         let body: string = await rp.get({
             uri: urlTable.authURL1,
             jar: this.cookieJar
@@ -57,8 +62,8 @@ export class BaseAcornAPI {
             form: this.extractFormData(body),
         });
         let loginInfo = this.extractFormData(body);
-        loginInfo.set('user', this.username);
-        loginInfo.set('pass', this.password);
+        loginInfo['user'] = this.username;
+        loginInfo['pass'] = this.password;
         body = await rp.post({
             uri: urlTable.authURL2,
             jar: this.cookieJar,
@@ -90,23 +95,25 @@ export class BaseAcornAPI {
 
         if (!body.search('<title>ACORN</title>'))
             throw new AcornError('Acorn Unavailable Now');
+
+        return true;
     }
 
     /**
      * Extract data from fields of all existing forms from HTML string or dom
      * @param doc HTML Document or HTML string
      */
-    private extractFormData(doc: libxmljs.HTMLDocument | string): Map<string, string> {
+    private extractFormData(doc: libxmljs.HTMLDocument | string): LooseObj {
         let sanctifiedDoc: libxmljs.HTMLDocument;
         if (typeof doc === 'string') {
             sanctifiedDoc = libxmljs.parseHtml(doc);
         } else {
             sanctifiedDoc = doc;
         }
-        const inputs: Array<libxmljs.Element> = sanctifiedDoc.find('//form//input');
-        let result = new Map<string, string>();
+        const inputs: Array<libxmljs.Element> = sanctifiedDoc.find('//form//input[@type="hidden"]');
+        let result: LooseObj = {};
         for (let input of inputs) {
-            result.set(input.attr('name').value(), input.attr('value').value());
+            result[input.attr('name').value()] = input.attr('value') ? input.attr('value').value() : "";
         }
         return result;
     }
