@@ -2,9 +2,9 @@
   "name": "acorn-api",
   "version": "1.0.0",
   "description": "University of Toronto Acorn API",
-  "main": "main.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register test/*.spec.ts"
+    "test": "perl test_script.pl"
   },
   "repository": {
     "type": "git",

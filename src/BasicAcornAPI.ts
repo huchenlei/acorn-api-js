@@ -11,12 +11,14 @@ import rp = require('request-promise');
 import libxmljs = require('libxmljs');
 
 import {AcornError} from './AcornError';
+import {BaseAcornAPI} from "./AcornAPI";
 
+const ACORN_HOST = "https://acorn.utoronto.ca";
 const urlTable = {
-    "authURL1": "https://acorn.utoronto.ca/sws",
+    "authURL1": ACORN_HOST + "/sws",
     "authURL2": "https://weblogin.utoronto.ca/",
     "authURL3": "https://idp.utorauth.utoronto.ca/PubCookie.reply",
-    "acornURL": "https://acorn.utoronto.ca/spACS"
+    "acornURL": ACORN_HOST + "/spACS"
 };
 
 const formHeader = {
@@ -29,44 +31,29 @@ interface LooseObj {
     [key: string]: string;
 }
 
-export class BaseAcornAPI {
-    protected cookieJar = rp.jar(); // Use default cookie jar implementation in request-promise
-    private username: string;
-    private password: string;
-
-    /**
-     * Password login acorn
-     * @param username
-     * @param password
-     */
-    public constructor(username: string, password: string) {
-        this.username = username;
-        this.password = password;
-    }
-
-
+export class BasicAcornAPI extends BaseAcornAPI {
     /**
      * Login to Acorn
      * @throws AcornError throw AcornError if login failed
      * @returns Boolean will be true if all processes goes properly
      */
-    public async login(): Promise<boolean> {
+    public async login(user: string, pass: string): Promise<boolean> {
         let body: string = await rp.get({
             uri: urlTable.authURL1,
-            jar: this.cookieJar
+            jar: this.state.cookieJar
         });
         body = await rp.post({
             uri: urlTable.authURL2,
-            jar: this.cookieJar,
+            jar: this.state.cookieJar,
             headers: formHeader,
             form: this.extractFormData(body),
         });
         let loginInfo = this.extractFormData(body);
-        loginInfo['user'] = this.username;
-        loginInfo['pass'] = this.password;
+        loginInfo['user'] = user;
+        loginInfo['pass'] = pass;
         body = await rp.post({
             uri: urlTable.authURL2,
-            jar: this.cookieJar,
+            jar: this.state.cookieJar,
             headers: formHeader,
             form: loginInfo,
         });
@@ -76,7 +63,7 @@ export class BaseAcornAPI {
 
         body = await rp.post({
             uri: urlTable.authURL3,
-            jar: this.cookieJar,
+            jar: this.state.cookieJar,
             headers: formHeader,
             form: this.extractFormData(body),
             followAllRedirects: true
@@ -87,21 +74,37 @@ export class BaseAcornAPI {
 
         body = await rp.post({
             uri: urlTable.acornURL,
-            jar: this.cookieJar,
+            jar: this.state.cookieJar,
             headers: formHeader,
             form: this.extractFormData(body),
             followAllRedirects: true
         });
 
-        if (!body.search('<title>ACORN</title>'))
+        if (!(body.search('<title>ACORN</title>') > -1))
             throw new AcornError('Acorn Unavailable Now');
 
+        // TODO check cookie to verify whether logged in
+        this.state.isLoggedIn = true;
+        return true;
+    }
+
+    public async logout(): Promise<boolean> {
+        let body = await rp.get({
+            uri: "http://www.rosi.utoronto.ca/acornLogout.html",
+            jar: this.state.cookieJar,
+            followAllRedirects: true
+        });
+        if (!(body.search('<title>ACORN Logout</title>') > -1))
+            throw new AcornError('Logout failed');
+        this.state.isLoggedIn = false;
         return true;
     }
 
     /**
      * Extract data from fields of all existing forms from HTML string or dom
+     * Helper method to facilitate auth process
      * @param doc HTML Document or HTML string
+     * @return LooseObj loose javascript object
      */
     private extractFormData(doc: libxmljs.HTMLDocument | string): LooseObj {
         let sanctifiedDoc: libxmljs.HTMLDocument;
