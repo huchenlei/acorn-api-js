@@ -46,9 +46,9 @@ export class BasicAcornAPI extends BaseAcornAPI {
             uri: urlTable.authURL2,
             jar: this.state.cookieJar,
             headers: formHeader,
-            form: this.extractFormData(body),
+            form: BasicAcornAPI.extractFormData(body),
         });
-        let loginInfo = this.extractFormData(body);
+        let loginInfo = BasicAcornAPI.extractFormData(body);
         loginInfo['user'] = user;
         loginInfo['pass'] = pass;
         body = await rp.post({
@@ -65,7 +65,7 @@ export class BasicAcornAPI extends BaseAcornAPI {
             uri: urlTable.authURL3,
             jar: this.state.cookieJar,
             headers: formHeader,
-            form: this.extractFormData(body),
+            form: BasicAcornAPI.extractFormData(body),
             followAllRedirects: true
         });
 
@@ -76,7 +76,7 @@ export class BasicAcornAPI extends BaseAcornAPI {
             uri: urlTable.acornURL,
             jar: this.state.cookieJar,
             headers: formHeader,
-            form: this.extractFormData(body),
+            form: BasicAcornAPI.extractFormData(body),
             followAllRedirects: true
         });
 
@@ -89,6 +89,7 @@ export class BasicAcornAPI extends BaseAcornAPI {
     }
 
     public async logout(): Promise<boolean> {
+
         let body = await rp.get({
             uri: "http://www.rosi.utoronto.ca/acornLogout.html",
             jar: this.state.cookieJar,
@@ -106,7 +107,7 @@ export class BasicAcornAPI extends BaseAcornAPI {
      * @param doc HTML Document or HTML string
      * @return LooseObj loose javascript object
      */
-    private extractFormData(doc: libxmljs.HTMLDocument | string): LooseObj {
+    private static extractFormData(doc: libxmljs.HTMLDocument | string): LooseObj {
         let sanctifiedDoc: libxmljs.HTMLDocument;
         if (typeof doc === 'string') {
             sanctifiedDoc = libxmljs.parseHtml(doc);

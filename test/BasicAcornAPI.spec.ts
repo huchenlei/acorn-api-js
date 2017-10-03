@@ -1,10 +1,8 @@
 /**
  * Created by Charlie on 2017-09-24.
  */
-
-import {expect} from 'chai';
-import {BasicAcornAPI} from '../src/BasicAcornAPI';
-import {AcornError} from "../src/AcornError";
+import {expect} from "chai";
+import {BasicAcornAPI} from "../src/BasicAcornAPI";
 
 require('chai').use(require('chai-as-promised')).should();
 
@@ -27,11 +25,6 @@ describe('BasicAcornAPI', function () {
         // console.log(basicAPI);
         let result = await basicAPI.login(config.data.user, config.data.pass);
         expect(result).to.be.true;
-    });
-
-    it('should logout the user', async function () {
-        let result = await basicAPI.logout();
-        expect(result).to.be.true;
-        // TODO add logout check
+        expect(basicAPI.state.isLoggedIn).to.be.true;
     });
 });

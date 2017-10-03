@@ -10,11 +10,10 @@ import rp = require('request-promise');
 export class CourseAcornAPI extends BaseAcornAPI {
     @needLogin
     public async getEligibleRegistrations(): Promise<object> {
-        const res = rp.get({
+        return await rp.get({
             uri: 'https://acorn.utoronto.ca/sws/rest/enrolment/eligible-registrations',
-            jar: this.state.cookieJar
+            jar: this.state.cookieJar,
+            json: true
         });
-        console.log(res);
-        return res;
     }
 }
