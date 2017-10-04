@@ -10,22 +10,6 @@ import request = require("request");
 
 require('chai').use(require('chai-as-promised')).should();
 
-class AcornRegistration{
-    post: {
-        code: string,
-        description: string,
-        acpDuration: number
-    };
-    sessionCode: string;
-    personId: number;
-    acpDuration: number;
-    secondaryOrgCode: string;
-    registrationParams: {
-        [key: string]: string
-    };
-    [key: string]: any;
-}
-
 const config = JSON.parse(require('fs').readFileSync('./test/test_config.json'));
 describe('CourseAcornAPI', async function () {
     this.timeout(15000); // set timeout to be 15s instead of default 2
@@ -44,6 +28,9 @@ describe('CourseAcornAPI', async function () {
         expect(courseAPI.state).to.deep.equal(basicAPI.state);
     });
 
+    /**
+     * Test for @needLogin decorator
+     */
     it('should not get registration if not logged in', function () {
         courseAPI.getEligibleRegistrations().should.be.rejected;
     });
@@ -55,5 +42,9 @@ describe('CourseAcornAPI', async function () {
         let res = await courseAPI.getEligibleRegistrations();
         res.should.be.a.instanceof(Array);
         (<Array<any>>res)[0].should.haveOwnProperty('registrationParams');
+    });
+
+    it('should get planned courses if logged in', async function() {
+        await courseAPI.getEnrolledCourses();
     });
 });

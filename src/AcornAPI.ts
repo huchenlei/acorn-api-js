@@ -56,7 +56,7 @@ export class BaseAcornAPI implements AcornAPI {
  * @param descriptor method descriptor
  * @return {PropertyDescriptor}
  */
-export function needLogin(target: Function, propertyKey: string, descriptor: any) {
+export function needLogin(target: any, propertyKey: string, descriptor: any) {
     // save a reference to the original method this way we keep the values currently in the
     // descriptor and don't overwrite what another decorator might have done to the descriptor.
     if (descriptor === undefined) {
