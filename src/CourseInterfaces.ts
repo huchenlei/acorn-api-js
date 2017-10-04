@@ -221,5 +221,32 @@ namespace Acorn {
         WAIT?: Course[];
         DROP?: Course[];
     }
+
+    export interface Info {
+        primaryActivities: any[];
+        secondaryActivities: any[];
+        thirdActivities: any[];
+    }
+
+    export interface Message {
+        title: string;
+        value: string;
+    }
+
+    export interface CartedCourse {
+        _id: string;
+        courseCode: string;
+        sectionCode: string;
+        primaryActivityId: string;
+        secondaryActivityId: string;
+        thirdActivityId: string;
+        courseTitle: string;
+        cancelled: boolean;
+        regSessionCode1: string;
+        regSessionCode2: string;
+        regSessionCode3: string;
+        messages: Message[];
+        info: Info;
+    }
 }
 

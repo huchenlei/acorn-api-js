@@ -4,14 +4,35 @@ import {BaseAcornAPI, needLogin} from "./AcornAPI";
 import rp = require('request-promise');
 import querystring = require('querystring');
 import {AcornError} from "./AcornError";
+import _ = require('lodash');
 
 /**
  * This class handles all course related actions on acorn
  * Created by Charlie on 2017-09-23.
  */
 
+
+function needRegistration(target: any, propertyKey: string, descriptor: any) {
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
+    }
+    let originalMethod = descriptor.value;
+    descriptor.value = async function (registrationIndex: number = 0, ...args: any[]) {
+        if ((<CourseAcornAPI>this).cachedRegistrations.length === 0) {
+            await (<CourseAcornAPI>this).getEligibleRegistrations();
+        }
+        const regisNum = (<CourseAcornAPI>this).cachedRegistrations.length;
+        if (!(regisNum > registrationIndex)) {
+            throw new AcornError(`Registration IndexOutOfBound! no enough registrations(need ${registrationIndex + 1}, but got ${regisNum})`);
+        }
+        args.unshift(registrationIndex); // add registration index at the front of args
+        return originalMethod.apply(this, args);
+    };
+    return descriptor;
+}
+
 export class CourseAcornAPI extends BaseAcornAPI {
-    private cachedRegistrations: Array<Acorn.Registration> = [];
+    cachedRegistrations: Array<Acorn.Registration> = [];
 
     /**
      * Get user registration status
@@ -29,32 +50,35 @@ export class CourseAcornAPI extends BaseAcornAPI {
     }
 
     /**
-     * Get list of courses that are in enrollment cart
+     * Get list of courses that are currently enrolled(APP), waitlisted(WAIT), dropped(DROP)
+     * @param registrationIndex
+     * @return {TRequest}
      */
     @needLogin
+    @needRegistration
     public async getEnrolledCourses(registrationIndex: number = 0): Promise<Acorn.EnrolledCourses> {
-        let registrations: Array<Acorn.Registration>;
-        if (this.cachedRegistrations.length === 0) {
-            registrations = (await this.getEligibleRegistrations());
-        } else {
-            registrations = this.cachedRegistrations;
-        }
-        if (!(registrations.length > registrationIndex)) {
-            throw new AcornError(`Registration IndexOutOfBound! no enough registrations(need ${registrationIndex + 1}, but got ${registrations.length})`);
-        }
-        const getQueryStr = querystring.stringify(registrations[registrationIndex].registrationParams);
+        const getQueryStr = querystring.stringify(this.cachedRegistrations[registrationIndex].registrationParams);
         return await rp.get({
             uri: 'https://acorn.utoronto.ca/sws/rest/enrolment/course/enrolled-courses?' + getQueryStr,
             jar: this.state.cookieJar,
-            json: true,
+            json: true
         });
     }
 
     /**
-     * Get list of courses that are either waitlisted or dropped
+     * Get list of courses that are in enrollment cart
+     * @param registrationIndex
+     * @return {TRequest}
      */
-    // public async getAppliedCourses(): Promise<object> {
-    //
-    // }
-
+    @needLogin
+    @needRegistration
+    public async getCartedCourses(registrationIndex: number = 0): Promise<Array<Acorn.CartedCourse>> {
+        const getQueryStr = querystring.stringify(_.pick(this.cachedRegistrations[registrationIndex],
+            ['candidacyPostCode', 'candidacySessionCode', 'sessionCode']));
+        return await rp.get({
+            uri: 'https://acorn.utoronto.ca/sws/rest/enrolment/plan?' + getQueryStr,
+            jar: this.state.cookieJar,
+            json: true
+        });
+    }
 }

@@ -1,12 +1,13 @@
 /**
  * Created by Charlie on 2017-09-24.
  */
-
-import {expect, should} from 'chai';
+import {expect} from "chai";
 import {CourseAcornAPI} from "../src/CourseAcornAPI";
 import {BasicAcornAPI} from "../src/BasicAcornAPI";
 import {AcornStateManager} from "../src/AcornAPI";
 import request = require("request");
+
+
 
 require('chai').use(require('chai-as-promised')).should();
 
@@ -44,7 +45,12 @@ describe('CourseAcornAPI', async function () {
         (<Array<any>>res)[0].should.haveOwnProperty('registrationParams');
     });
 
-    it('should get planned courses if logged in', async function() {
+    it('should get enrolled courses if logged in', async function() {
         await courseAPI.getEnrolledCourses();
+    });
+
+    it('should get carted courses if logged in', async function() {
+        let res = await courseAPI.getCartedCourses();
+        require('fs').writeFileSync('./cart.json', JSON.stringify(res));
     });
 });

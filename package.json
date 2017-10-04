@@ -21,10 +21,12 @@
   "homepage": "https://github.com/CharlieUofT/acorn-api-js#readme",
   "dependencies": {
     "@types/libxmljs": "^0.14.30",
+    "@types/lodash": "^4.14.77",
     "@types/request": "^2.0.3",
     "@types/request-promise": "^4.1.37",
     "@types/tough-cookie": "^2.3.1",
     "libxmljs": "^0.18.7",
+    "lodash": "^4.17.4",
     "request": "^2.82.0",
     "request-promise": "^4.2.2",
     "tough-cookie": "^2.3.3",
@@ -37,6 +39,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "mocha": "^3.5.3",
+    "request-debug": "^0.2.0",
     "ts-node": "^3.3.0"
   }
 }

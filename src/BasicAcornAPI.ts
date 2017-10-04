@@ -88,19 +88,6 @@ export class BasicAcornAPI extends BaseAcornAPI {
         return true;
     }
 
-    public async logout(): Promise<boolean> {
-
-        let body = await rp.get({
-            uri: "http://www.rosi.utoronto.ca/acornLogout.html",
-            jar: this.state.cookieJar,
-            followAllRedirects: true
-        });
-        if (!(body.search('<title>ACORN Logout</title>') > -1))
-            throw new AcornError('Logout failed');
-        this.state.isLoggedIn = false;
-        return true;
-    }
-
     /**
      * Extract data from fields of all existing forms from HTML string or dom
      * Helper method to facilitate auth process
