@@ -9,7 +9,7 @@ This project is inspired by [AcornAPI](https://github.com/LesterLyu/AcornAPI)
 ```javascript
 import { Acorn } from 'acorn-api-js';
 const example = new Acorn();
-example.login('user', 'pass');
+example.basic.login('user', 'pass');
 ```
 
 ### Get Registrations
