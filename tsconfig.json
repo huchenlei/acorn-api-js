@@ -64,7 +64,8 @@
     "./node_modules/@types/libxmljs/index.d.ts",
     "./node_modules/@types/mocha/index.d.ts",
     "./node_modules/@types/chai/index.d.ts",
-    "./node_modules/@types/lodash/index.d.ts"
+    "./node_modules/@types/lodash/index.d.ts",
+    "./node_modules/@types/sanitize-html/index.d.ts"
   ],
   "include": [
     "src/**/*.ts",

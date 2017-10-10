@@ -24,11 +24,13 @@
     "@types/lodash": "^4.14.77",
     "@types/request": "^2.0.3",
     "@types/request-promise": "^4.1.37",
+    "@types/sanitize-html": "^1.13.31",
     "@types/tough-cookie": "^2.3.1",
     "libxmljs": "^0.18.7",
     "lodash": "^4.17.4",
     "request": "^2.82.0",
     "request-promise": "^4.2.2",
+    "sanitize-html": "^1.14.1",
     "tough-cookie": "^2.3.3",
     "typescript": "^2.5.2"
   },
