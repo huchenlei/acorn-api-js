@@ -2,9 +2,11 @@
   "name": "acorn-api",
   "version": "1.0.0",
   "description": "University of Toronto Acorn API",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "perl test_script.pl"
+    "test": "perl test_script.pl",
+    "prepublishOnly": "tsc -p ./ --outDir dist/"
   },
   "repository": {
     "type": "git",
@@ -13,7 +15,7 @@
   "keywords": [
     "Acorn"
   ],
-  "author": "Charlie Hu",
+  "author": "Chenlei Hu",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/CharlieUofT/acorn-api-js/issues"

@@ -48,7 +48,9 @@ describe('CourseAcornAPI', async function () {
     });
 
     it('should get enrolled courses if logged in', async function () {
+        // const result =
         await courseAPI.getEnrolledCourses();
+        // require('fs').writeFileSync('./encourse.json', JSON.stringify(result));
     });
 
     let cartedCourse: Acorn.CartedCourse | null = null;
