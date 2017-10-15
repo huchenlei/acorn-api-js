@@ -3,10 +3,10 @@
  */
 import {expect} from "chai";
 import {BasicAcornAPI} from "../src/BasicAcornAPI";
+import {config} from "./TestHelper";
 
 require('chai').use(require('chai-as-promised')).should();
 
-const config = JSON.parse(require('fs').readFileSync('./test/test_config.json'));
 
 describe('BasicAcornAPI', function () {
     this.timeout(15000); // set timeout to be 15s instead of default 2

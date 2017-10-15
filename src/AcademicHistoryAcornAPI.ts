@@ -1,6 +1,5 @@
 import {BaseAcornAPI, needLogin} from "./AcornAPI";
 import rp = require('request-promise');
-import sanitizeHtml = require('sanitize-html');
 import libxmljs = require('libxmljs');
 import _ = require('lodash');
 import {isUndefined} from "util";
@@ -59,13 +58,14 @@ export class AcademicHistoryAcornAPI extends BaseAcornAPI {
                         return !(/^[ \t\n]*$/.test(courseScore));
                     }),
                     courseScore => {
-                        const match = /(\w{3,4}\d{3,4}\w\d) (.+?) (\d\.\d\d) (.+)/
+                        let match = /(\w{3,4}\d{3,4}\w\d) (.+?) (\d\.\d\d) (.+)/
                             .exec(courseScore);
                         if (isNull(match)) {
                             throw new AcornError("Unexpected course score format: " + courseScore);
                         }
                         match.shift(); // Remove the first match which is not a capture
-                        const scoreRegex = /(\d{1,3}) (\w[+\-]?) (\w[+\-]?)/;
+                        _.map(match, _.trim);
+                        const scoreRegex = /(\d{1,3})\s+(\w[+\-]?)\s+(\w[+\-]?)/;
                         const mustFields = ["code", "title", "weight"];
                         const lastField = match[match.length - 1];
                         if (scoreRegex.test(lastField)) {

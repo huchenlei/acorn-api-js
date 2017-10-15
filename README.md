@@ -2,7 +2,7 @@
 This project is inspired by [AcornAPI](https://github.com/LesterLyu/AcornAPI)
  which is an Acorn API written in Java.
 
-# Installation
+## Installation
 ```bash
 npm install acorn-api --save
 ```

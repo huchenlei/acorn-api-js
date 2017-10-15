@@ -9,11 +9,11 @@ import {AcornError} from '../src/AcornError';
 import request = require("request");
 import assert = require('assert');
 import _ = require("lodash");
+import {config, logToFileSync} from "./TestHelper";
 
 
 require('chai').use(require('chai-as-promised')).should();
 
-const config = JSON.parse(require('fs').readFileSync('./test/test_config.json'));
 describe('CourseAcornAPI', async function () {
     this.timeout(15000); // set timeout to be 15s instead of default 2
     let basicAPI: BasicAcornAPI;
@@ -45,12 +45,11 @@ describe('CourseAcornAPI', async function () {
         let res = await courseAPI.getEligibleRegistrations();
         res.should.be.a.instanceof(Array);
         (<Array<any>>res)[0].should.haveOwnProperty('registrationParams');
+        logToFileSync('registrations', res);
     });
 
     it('should get enrolled courses if logged in', async function () {
-        // const result =
-        await courseAPI.getEnrolledCourses();
-        // require('fs').writeFileSync('./encourse.json', JSON.stringify(result));
+        logToFileSync('enrolled_courses', await courseAPI.getEnrolledCourses());
     });
 
     let cartedCourse: Acorn.CartedCourse | null = null;
@@ -60,6 +59,7 @@ describe('CourseAcornAPI', async function () {
         if (cartedCourses.length > 0) {
             cartedCourse = cartedCourses[0];
         }
+        logToFileSync('carted_courses', cartedCourses);
     });
 
     // TODO test when course registration is open
@@ -80,5 +80,6 @@ describe('CourseAcornAPI', async function () {
         assert(sessionCodes.length > 0, 'no session code available'); // need at least one sessionCode
         const res = await courseAPI.getExtraCourseInfo(
             0, cartedCourse.courseCode, sessionCodes[0], cartedCourse.sectionCode);
+        logToFileSync('extra_course_info', res);
     });
 });

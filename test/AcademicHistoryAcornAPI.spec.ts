@@ -6,10 +6,9 @@ import {AcademicHistoryAcornAPI} from "../src/AcademicHistoryAcornAPI";
 import {BasicAcornAPI} from "../src/BasicAcornAPI";
 import {AcornStateManager} from "../src/AcornAPI";
 import request = require("request");
+import {config, logToFileSync} from "./TestHelper";
 
 require('chai').use(require('chai-as-promised')).should();
-
-const config = JSON.parse(require('fs').readFileSync('./test/test_config.json'));
 
 describe('AcademicHistoryAcornAPI', function () {
     this.timeout(15000); // set timeout to be 15s instead of default 2
@@ -23,7 +22,7 @@ describe('AcademicHistoryAcornAPI', function () {
         await basicAPI.login(config.data.user, config.data.pass);
     });
 
-    it('should get academic history', async function() {
-        await academicAPI.getAcademicHistory();
+    it('should get academic history', async function () {
+        logToFileSync('academic_history', await academicAPI.getAcademicHistory());
     });
 });

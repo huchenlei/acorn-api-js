@@ -65,3 +65,6 @@ typings/
 
 # Test Configurations
 /test/test_config.json
+
+# Test logs
+/test/logs/
